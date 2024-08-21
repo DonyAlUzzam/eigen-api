@@ -13,4 +13,22 @@ const getActiveBorrows = async () => {
     return rows;
 };
 
-module.exports = { borrowBook, returnBook, getActiveBorrows };
+const getBorrowStats = async () => {
+    const query = `
+        SELECT m.code AS memberCode, m.name, COUNT(bb.book_code) AS borrowedBooksCount
+        FROM members m
+        LEFT JOIN borrows bb ON m.code = bb.member_code
+        GROUP BY m.code
+    `;
+    const [results] = await db.query(query);
+
+    return results;
+    // res.json({
+    //     status: 'success',
+    //     message: 'Successfully retrieved borrow stats',
+    //     data: results
+    // });
+};
+
+
+module.exports = { borrowBook, returnBook, getActiveBorrows, getBorrowStats };
