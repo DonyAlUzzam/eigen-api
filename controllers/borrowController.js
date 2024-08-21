@@ -41,7 +41,7 @@ const returnBook = async (req, res) => {
     const borrowedDays = Math.floor((new Date() - new Date(borrow.borrow_date)) / (1000 * 60 * 60 * 24));
     if (borrowedDays > 1) {
         const penaltyEnd = new Date();
-        penaltyEnd.setDate(penaltyEnd.getDate() + 3); // 3 days penalty
+        penaltyEnd.setDate(penaltyEnd.getDate() + 3); 
         await penaltyModel.addPenalty(memberCode, new Date(), penaltyEnd);
     }
 
@@ -49,4 +49,13 @@ const returnBook = async (req, res) => {
     res.status(200).json(successResponse('Book returned successfully'));
 };
 
-module.exports = { borrowBook, returnBook };
+const getBorrowStats = async (req, res) => {
+    try {
+     const borrowing = await borrowModel.getBorrowStats();
+     res.status(200).json(successResponse(borrowing));
+    } catch (error) {
+     res.status(500).json(errorResponse('Error Get borrowing', error));
+    }
+ };
+
+module.exports = { borrowBook, returnBook, getBorrowStats };
