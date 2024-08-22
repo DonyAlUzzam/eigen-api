@@ -32,14 +32,14 @@ const returnBook = async (req, res) => {
     const { memberCode, bookCode } = req.body;
 
     const book = await bookModel.getBookByCode(bookCode);
-    const borrow = await borrowModel.returnBook(memberCode, bookCode, new Date());
-
-    if (!borrow) {
+    const borrowMemberActive = await borrowModel.getActiveBorrowsMember(memberCode, bookCode);
+    if (borrowMemberActive.length<1) {
         return res.status(400).json(errorResponse('Book was not borrowed by this member'));
     }
+    const borrow = await borrowModel.returnBook(memberCode, bookCode, new Date());
 
-    const borrowedDays = Math.floor((new Date() - new Date(borrow.borrow_date)) / (1000 * 60 * 60 * 24));
-    if (borrowedDays > 1) {
+    const borrowedDays = Math.floor((new Date() - new Date(borrowMemberActive[0].borrow_date)) / (1000 * 60 * 60 * 24));
+    if (borrowedDays > 7) {
         const penaltyEnd = new Date();
         penaltyEnd.setDate(penaltyEnd.getDate() + 3); 
         await penaltyModel.addPenalty(memberCode, new Date(), penaltyEnd);
